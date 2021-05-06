@@ -24,7 +24,7 @@ def fprobability(k):
 
 def mprobability(k):
     # You will need to implement this function and change the return value.   
-    return 0.0
+    return 4**(-k) 
 
 
 def run_fermat(N, k=200):
@@ -49,11 +49,29 @@ def run_fermat(N, k=200):
         return "composite"
 
 
-def run_miller_rabin(N, k):
-    # You will need to implement this function and change the return value, which should be
-    # either 'prime' or 'composite'.
-    #
-    # To generate random values for a, you will most likley want to use
-    # random.randint(low,hi) which gives a random integer between low and
-    #  hi, inclusive.
-    return 'composite'
+
+def factor(n,k=1):
+    m = (n-1)/2**k
+    if m%1 != 0:
+        return k-1, (n-1)/2**(k-1)
+    else:
+        return factor(n,k+1)
+
+def b_helper(b,n):
+    b_n = b**2 % n
+    if b_n == 1:
+        return "composite"
+    elif b_n == -1:
+        return "prime"
+    else:
+        return b_helper(b_n,n)
+
+def run_miller_rabin(N, k): 
+    k,m = factor(N)
+    a = random.randint(2,N-2)
+    b_0 = (a**m)%N
+    if b_0 == 1 or b_0 == -1:
+        return "prime"
+    else:
+        return b_helper(b_0,N)
+
