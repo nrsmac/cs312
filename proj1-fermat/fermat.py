@@ -15,63 +15,46 @@ def mod_exp(x, y, N):
         return z ** 2 % N
     else:
         return x * (z ** 2) % N
-    return 1
 
 
 def fprobability(k):
     # You will need to implement this function and change the return value.   
-    return 1-1/(2**k)
+    return 1 - 1 / (2 ** k)
+
 
 def mprobability(k):
     # You will need to implement this function and change the return value.   
-    return 4**(-k) 
+    return 1 - (4 ** (-k))
 
 
 def run_fermat(N, k=200):
-    # You will need to implement this function and change the return value, which should be
-    # either 'prime' or 'composite'.
-    #
-    # To generate random values for a, you will most likley want to use
-    # random.randint(low,hi) which gives a random integer between low and
-    #  hi, inclusive.
-    is_prime = True
-
-    a = []
-    for a_n in range(0, k):
-        a.append(random.randint(1, N - 1))
     for i in range(0, k):
-        if a[i] ** (N - 1) % N != 1 % N:
-            is_prime = False
+        a = random.randint(1, N - 1)
+        if mod_exp(a, N - 1, N) != 1:
+            # can be prime
+            return "composite"
+    return "prime"
 
-    if is_prime:
+
+def b_helper(b, power, n):  # (ranNum, power, N )
+    # check if it is even
+    # if mod_exp(variables)  ==(N-1) can be prime
+    # if mod_exp() return !1 this case can be composite
+
+    b_n = mod_exp(b, power, n)
+    if b_n == (n - 1):
         return "prime"
-    else:
-        return "composite"
+    elif b_n != 1:
+        return b_helper(b_n, power // 2, n)
 
 
-
-def factor(n,k=1):
-    m = (n-1)/2**k
-    if m%1 != 0:
-        return k-1, (n-1)/2**(k-1)
-    else:
-        return factor(n,k+1)
-
-def b_helper(b,n):
-    b_n = b**2 % n
-    if b_n == 1:
-        return "composite"
-    elif b_n == -1:
-        return "prime"
-    else:
-        return b_helper(b_n,n)
-
-def run_miller_rabin(N, k): 
-    k,m = factor(N)
-    a = random.randint(2,N-2)
-    b_0 = (a**m)%N
-    if b_0 == 1 or b_0 == -1:
-        return "prime"
-    else:
-        return b_helper(b_0,N)
-
+def run_miller_rabin(N, k):
+    for i in range(k):
+        if N % 2 == 0:
+            return "composite"
+        a = random.randint(2, N - 2)
+        b_0 = mod_exp(a, N - 1, N)
+        if b_0 == 1 or b_0 == -1:
+            return "prime"
+        else:
+            return b_helper(b_0, N - 1, N)
