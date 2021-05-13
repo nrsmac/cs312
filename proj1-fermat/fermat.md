@@ -64,6 +64,8 @@ O(n^3)
 $$
 
 
+
+
 ---
 
 ## Fermat primality test
@@ -164,7 +166,7 @@ if b_n is even:
 if b_n = (n-1):
 	return "prime"
 else if b_n is not 1:
-	return mr_helper(b_n, power//2, n)  # Exponent halved again
+	return mr_helper(b_n, power//2, n)  # O(logN) complexity
 ```
 
 > Note how the power is being halved before each recursive call. This means that by the time `b_n` is calculated after a recursive call, this would take O(n^6) time to perform, unfortunately. 
@@ -179,27 +181,25 @@ Output: "prime" or "composite"
 Repeat k times:  # Linear time O(k)
 	if n is even: 
 		return "composite"
-	a = random integer between (2, N-2)  # Why?
+	a = random integer between (2, N-2)
 	b_0 = mod_exp(a, N-1, N)  # Our initial modular exponentiation. Takes O(n^3) time
 	if b_0 = 1 or b_0 = -1: 
 		return "prime"
 	else:
-		return mb_helper(b_0, N-1, N)  # Recursive call O(n^6)
+		return mb_helper(b_0, N-1, N)  # Recursive call O(n)
 ```
 
 ### Complexity of Miller-Rabin Test
 
 Evaluating time complexity for Miller-Rabin test is multifaceted, but by following the steps of the pseudocode, the following steps:
 $$
-1+1+O(n^3)+1+O(n^6)\\
-O(n^3)+O(n^6) = O(n^3+n^6)=O(n^6)
+1+1+O(n^3)\times O(n) +1\\
+O(n^3)+O(n^6) = O(n^3\times n^6)=O(n^6)
 $$
 where $n^6$ dominates. This is run *k* times:
 $$
-kO(n^6) = O(kn^6)
+O(k\cdot n \cdot n^3) = O(n^4)
 $$
-Again, $n^6$ dominates, yielding an overall time complexity of $O(n^6)$.
-
 
 
 ### Accuracy of Miller-Rabin Test
