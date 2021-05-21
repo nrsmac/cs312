@@ -14,6 +14,7 @@ Output: lines
 	
 process merge(l,r):
 	find_upper_tangent(l,r)
+	find_lower_tangent(l,r)
 	
 process find_upper_tangent(l,r):
 	Input: two arrays of points each representing two polygons
@@ -58,5 +59,4 @@ if u[1].x <= v[1].x
 else:
 	return y[1].append(sort_helper(x[1...k],y[2...]))
 ```
-
 

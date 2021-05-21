@@ -50,7 +50,7 @@ class PointLineView( QWidget ):
             for color in self.lineList:
                 for line in lines:
                     try:
-                        self.lineList[color].remove(line)
+                        self.lineList[color].pop(line)
                     except:
                         pass    
         self.repaint()
@@ -212,7 +212,7 @@ class Proj2GUI( QMainWindow ):
         self.setCentralWidget( boxwidget )
 
         self.view           = PointLineView( self.statusBar )
-        self.npoints        = QLineEdit('40')
+        self.npoints        = QLineEdit('6')
         self.generateButton = QPushButton('Generate')
         self.solveButton    = QPushButton('Solve')
         self.clearButton    = QPushButton('Clear To Points')
@@ -222,7 +222,7 @@ class Proj2GUI( QMainWindow ):
 
         self.randByTime     = QRadioButton('Random')
         self.randBySeed     = QRadioButton('Seed')
-        self.randSeed       = QLineEdit('0')
+        self.randSeed       = QLineEdit('4')
 
         self.showRecursion    = QCheckBox('Show Recursion')
 
@@ -271,7 +271,9 @@ class Proj2GUI( QMainWindow ):
         self.randBySeed.clicked.connect(self._randbyseed)
 
 
-        self.randByTime.setChecked(True)
+        self.randByTime.setChecked(False)
+        self.randBySeed.setChecked(True)
+
         self.distribOval.setChecked(True)
         self.generateClicked()
 
