@@ -31,8 +31,12 @@ class NetworkRoutingSolver:
         destNode = self.network.nodes[destIndex]
         path_nodes = []
         path_nodes.insert(0, destNode)
-        dest_node_entry = self.distances[destNode.node_id]
-        total_length = self.get_path(dest_node_entry, total_length, path_nodes)
+
+        node = destNode
+        while node is not None:
+            path_nodes.append(node)
+            node = self.distances[node][1]
+
 
         ##TODO return list of GraphEdges!!
         at_dest = False
@@ -44,6 +48,9 @@ class NetworkRoutingSolver:
                 if edge.dest in path_nodes:
                     path_edges.append(edge)
 
+        for edge in path_edges:
+            total_length += edge.length
+
         path_edge_tuples = []
 
         while len(path_edges) > 0:
@@ -52,12 +59,6 @@ class NetworkRoutingSolver:
 
         return {'cost':total_length, 'path':path_edge_tuples}
 
-    def get_path(self, dist_entry, length, path):
-        if dist_entry[1] is None:  # Base case, node has no previous
-            return 0
-        length += dist_entry[0]
-        path.append(self.network.nodes[dist_entry[1]])
-        return length + self.get_path(self.distances[dist_entry[1]], length, path)
 
     def computeShortestPaths( self, srcIndex, use_heap=False ):
         self.source = srcIndex
@@ -66,26 +67,42 @@ class NetworkRoutingSolver:
         # TODO: RUN DIJKSTRA'S TO DETERMINE SHORTEST PATHS.
         #       ALSO, STORE THE RESULTS FOR THE SUBSEQUENT
         #       CALL TO getShortestPath(dest_index)
-        nodes = self.network.nodes.copy()
-        queue = PriorityQueue()
-        srcNode = nodes.pop(srcIndex)
-        queue.insert([srcNode, 0, None])
-        distances = {srcNode.node_id: [0, None]}
-
-        for node in nodes:
-            queue.insert([node, float("inf"), None])
-            distances[node.node_id] = [float("inf"), None]
-
-        while not queue.is_empty():
-            u = queue.pop()[0]
-            for edge in u.neighbors:
-                v = edge.dest
-                weight = edge.length
-                if distances[v.node_id][0] > distances[u.node_id][0] + weight:
-                    distances[v.node_id][0] = distances[u.node_id][0] + weight
-                    distances[v.node_id][1] = u.node_id
-
-        self.distances = distances.copy()
+        if not use_heap:
+            self.dijkstra_array(srcIndex)
+        else:
+            self.djikstra_heap(srcIndex)
         t2 = time.time()
         return (t2-t1)
+
+    def dijkstra_heap(self):
+        pass
+
+    def dijkstra_array(self, srcIndex):
+        nodes = self.network.nodes.copy()
+        srcNode = nodes.pop(srcIndex)
+        table = {srcNode: [0, None], }
+        visited = []
+        unvisited = [srcNode]
+        for node in nodes:
+            unvisited.append(node)
+            table[node] = [float("inf"), None]
+        node = srcNode
+        while len(unvisited) != 0:
+            for neighbor_edge in [n for n in node.neighbors if n not in visited]:
+                neighbor = neighbor_edge.dest
+                new_distance = table[node][0] + neighbor_edge.length
+                if new_distance < table[neighbor][0]:
+                    table[neighbor] = [new_distance, node]
+            visited.append(node)
+            unvisited.remove(node)
+
+            min_node = None
+            min_distance = float('inf')
+            for node in unvisited:
+                if table[node][0] <= min_distance:
+                    min_node = node
+                    min_distance = table[node][0]
+
+            node = min_node
+        self.distances = table.copy()  # TODO update
 
