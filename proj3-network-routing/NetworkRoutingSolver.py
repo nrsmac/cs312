@@ -3,7 +3,7 @@
 
 from CS312Graph import *
 import time
-from priority_queue import *
+from heap import *
 
 
 class NetworkRoutingSolver:
@@ -70,12 +70,42 @@ class NetworkRoutingSolver:
         if not use_heap:
             self.dijkstra_array(srcIndex)
         else:
-            self.djikstra_heap(srcIndex)
+            self.dijkstra_heap(srcIndex)
         t2 = time.time()
         return (t2-t1)
 
-    def dijkstra_heap(self):
-        pass
+    def dijkstra_heap(self, srcIndex):
+        heap = Heap()
+        nodes = self.network.nodes.copy()
+        srcNode = nodes.pop(srcIndex)
+        visited = []
+        table = {srcNode:[0, None]}
+        unvisited = [srcNode]
+
+        for node in nodes:
+            unvisited.append(node)
+            table[node] = [float("inf"), None]
+        node = srcNode
+
+        for node in nodes:
+            entry = HeapEntry(node, float('inf'), None)
+            heap.insert(entry)
+
+        u = heap.delete()
+        for neighbor_edge in u.node.neighbors:
+            if neighbor_edge.length > u.weight
+
+        #     for all u ∈ V: dist(u) = ∞
+        #     prev(u) = nil
+        #     dist(s) = 0
+        #     H = makequeue(V)(using dist - values as keys) while H is not empty:
+        #       u = deletemin(H)
+        #     for all edges(u, v) ∈ E:
+        #         if dist(v) > dist(u) + l(u, v):
+        #           dist(v) = dist(u) + l(u, v)
+        #           prev(v) = u
+        #           decreasekey(H, v)
+
 
     def dijkstra_array(self, srcIndex):
         nodes = self.network.nodes.copy()
