@@ -356,7 +356,7 @@ class Proj3GUI( QMainWindow ):
             for node in self.graph.nodes:
                 if math.sqrt(pow((abs(node.loc.x()-point.x())),2) + pow((abs(node.loc.y()-point.y())),2)) < dist:
                     dist = math.sqrt(pow((abs(node.loc.x()-point.x())),2) + pow((abs(node.loc.y()-point.y())),2))
-                    id = node.node_id+1
+                    id = node.node + 1
             if id != -1:
                 self.view.clearEdges()
                 if clickednode == 'start':

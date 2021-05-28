@@ -1,60 +1,44 @@
 class Heap:
 
-    def __init__(self):
-        self.list = []
-        self.list.append(None)  # A zero will screw up indexing
+    def __init__(self, size):
+        blank_entry = HeapEntry(None, 0, None)
+        self.list = [blank_entry]*(size+1)
+        self.list[0] = None  # A zero will screw up indexing
         self.size = 0
 
     def insert(self, node):
-        self.list.append(node)
         self.size += 1
-        self.move_up()
-
-    def move_up(self):
+        self.list[self.size ] = node
         i = self.size
+        while (self.list[i//2] is not None and self.list[i] is not None) and self.list[i].weight < self.list[i//2].weight:
+            self.list[i], self.list[(i-1)//2] = self.list[(i-1)//2], self.list[i]
 
-        node = self.list[i]
-        parent = self.list[i // 2]
-        while i // 2 > 0:  # Stop if we hit the root at 0
-            if node.weight > parent.weight:
-                node, parent = parent, node
-            i = i // 2
+    def heapify(self, i):
+        l = (i*2)
+        r = (i*2) + 1
 
-    def move_down(self):
+        if not (i >= self.size//2 and i <= self.size):
+            if self.list[i].weight > self.list[r].weight or self.list[i].weight > self.list[r].weight:
+                if self.list[l].weight < self.list[r].weight:
+                    self.list[i], self.list[l] = self.list[l], self.list[i]
+                    self.heapify(l)
+                else:
+                    self.list[i], self.list[r] = self.list[r], self.list[i]
+                    self.heapify(r)
 
-        i = 1  # Start at root
 
-        while (i*2) <= self.size:
-
-            min_index = self.get_min_child(i)
-
-            current_node = self.list[i]
-            min_node = self.list[min_index]
-
-            if current_node.weight > min_node.weight:
-                min_node, current_node = current_node,
-            i = min_index
-
-    def get_min_child(self, i):
-
-        if (i * 2) + 1 > self.size:
-            return i * 2
-        else:
-            if self.list[i * 2].weight < self.list[(i * 2) + 1].weight:
-                return i * 2
-            else:
-                return (i * 2) + 1
-
-    def delete(self):
-
-        if len(self.list) < 1:
+    def pop(self):
+        if len(self.list) <= 1:
             raise ValueError("No items in heap")
-        deleted = self.list[self.size]
+
+        deleted = self.list[1]
         self.list[1] = self.list[self.size]
-        self.list.pop(self.size)
         self.size -= 1
-        self.move_down()
+        self.heapify(1)
         return deleted
+
+    def peek(self):
+        return self.list[1]
 
 
 class HeapEntry:
@@ -63,3 +47,6 @@ class HeapEntry:
         self.node = node
         self.weight = weight
         self.previous = previous
+
+    def __repr__(self):
+        return repr("Node: " + str(self.node) + " weight: " + str(self.weight) + " previous: " + str(self.previous))

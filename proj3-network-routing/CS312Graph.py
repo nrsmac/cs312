@@ -23,7 +23,7 @@ class CS312GraphNode:
         self.neighbors.append( CS312GraphEdge(self,neighborNode,weight) )
 
     def __str__( self ):
-        neighbors = [edge.dest.node_id for edge in self.neighbors]
+        neighbors = [edge.dest.node for edge in self.neighbors]
         return 'Node(id:{},neighbors:{})'.format(self.node_id,neighbors)
 
 

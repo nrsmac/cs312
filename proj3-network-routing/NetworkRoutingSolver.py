@@ -7,14 +7,14 @@ from heap import *
 
 
 class NetworkRoutingSolver:
-    def __init__( self ):
+    def __init__(self):
         self.distances = {}
 
-    def initializeNetwork( self, network ):
-        assert( type(network) == CS312Graph )
+    def initializeNetwork(self, network):
+        assert (type(network) == CS312Graph)
         self.network = network
 
-    def getShortestPath( self, destIndex ):
+    def getShortestPath(self, destIndex):
         self.dest = destIndex
 
         # TODO: RETURN THE SHORTEST PATH FOR destIndex
@@ -37,8 +37,6 @@ class NetworkRoutingSolver:
             path_nodes.append(node)
             node = self.distances[node][1]
 
-
-        ##TODO return list of GraphEdges!!
         at_dest = False
         while not at_dest:
             node = path_nodes.pop()
@@ -57,10 +55,9 @@ class NetworkRoutingSolver:
             edge = path_edges.pop()
             path_edge_tuples.append((edge.src.loc, edge.dest.loc, '{:.0f}'.format(edge.length)))
 
-        return {'cost':total_length, 'path':path_edge_tuples}
+        return {'cost': total_length, 'path': path_edge_tuples}
 
-
-    def computeShortestPaths( self, srcIndex, use_heap=False ):
+    def computeShortestPaths(self, srcIndex, use_heap=False):
         self.source = srcIndex
         t1 = time.time()
 
@@ -72,40 +69,33 @@ class NetworkRoutingSolver:
         else:
             self.dijkstra_heap(srcIndex)
         t2 = time.time()
-        return (t2-t1)
+        return (t2 - t1)
 
     def dijkstra_heap(self, srcIndex):
-        heap = Heap()
         nodes = self.network.nodes.copy()
+        heap = Heap(len(nodes)+1)
         srcNode = nodes.pop(srcIndex)
+        table = {}
+
         visited = []
-        table = {srcNode:[0, None]}
-        unvisited = [srcNode]
 
         for node in nodes:
-            unvisited.append(node)
             table[node] = [float("inf"), None]
+
+        table[srcNode] = [0, None]
         node = srcNode
+        heap.insert(HeapEntry(node, 0, None))
 
-        for node in nodes:
-            entry = HeapEntry(node, float('inf'), None)
-            heap.insert(entry)
+        while heap.size != 0:
+            popped = heap.pop()
+            visited.append(popped.node)
+            for edge in popped.node.neighbors:
+                new_distance = table[popped.node][0] + edge.length
+                if new_distance < table[edge.dest][0]:
+                    table[edge.dest] = [new_distance, popped.node]
+                    heap.insert(HeapEntry(edge.dest, new_distance, popped.node))
 
-        u = heap.delete()
-        for neighbor_edge in u.node.neighbors:
-            if neighbor_edge.length > u.weight
-
-        #     for all u ∈ V: dist(u) = ∞
-        #     prev(u) = nil
-        #     dist(s) = 0
-        #     H = makequeue(V)(using dist - values as keys) while H is not empty:
-        #       u = deletemin(H)
-        #     for all edges(u, v) ∈ E:
-        #         if dist(v) > dist(u) + l(u, v):
-        #           dist(v) = dist(u) + l(u, v)
-        #           prev(v) = u
-        #           decreasekey(H, v)
-
+        self.distances = table.copy()
 
     def dijkstra_array(self, srcIndex):
         nodes = self.network.nodes.copy()
@@ -134,5 +124,4 @@ class NetworkRoutingSolver:
                     min_distance = table[node][0]
 
             node = min_node
-        self.distances = table.copy()  # TODO update
-
+        self.distances = table.copy()
