@@ -1,276 +1,184 @@
-# Noah Schill -- Lab 1 Submission
+# Noah Schill -- Lab 4 Submission
 
+## Complexity analysis
 
+### Unrestricted algorithm
 
-![Screenshot from 2021-05-06 21-01-33](/home/nrsmac/PycharmProjects/cs312/proj1-fermat/Screenshot from 2021-05-06 21-01-33-1620356632019.png)
+My implementation (inspired by Chester) consists of two parts, the table compilation, and the path-finding matrix which traces itself back to produce a string. 
 
-[^Fig. 1]: The *Primality Tester* in all its glory.
+First, we create two matrices, one with edit distances, and another with pointers informing where the previous cell was. The initialization process consists of two for loops to initialize the top row and first column of the edit distance matrix, one taking $n$ time and the other taking $m$ time. 
 
-## Modular Exponentiation
+The next section is somewhat concerning , as there are two nested for loops, but this runs at $O(mn)$ time for two sequences of $n,m$ length. These nested loops will populate both the edit distance matrix and the pointer matrix. Each cell is calculated by three of it's neighbors, which takes constant time. Running this for every cell in an $m\times n$ table will yield $O(mn)$.
 
-Modular exponentiation is the process of representing numbers via an exponentiation using modulus. In this case, we are trying to represent:
-$$
-x^y\mod N
-$$
-If *y* is 0, then x^y mod N must be 1, as anything to the power of 0 is 1. Let z:
-$$
-z = x^{\lfloor y/2 \rfloor} \mod N
-$$
+The path-finding section in a worst-case scenario run at $O(m+n)$ and at best $\min(O(m), O(n))$ as it has to trace it's way from the optimal point along the pointer matrix back to the origin. These are all dominated by the multiplicative $O(mn)$ and therefore, the entire algorithm has this complexity. 
 
-[^ z]: This step is calculated by recursively calling the same function with the exponent halved. Each following operation is n\2 length.
+### Banded algorithm
 
-We can then determine two possible outcomes via seeing if y is even. This check takes constant time. 
+I was unfortunately not able to implement the banded algorithm, but I understand conceptually how it works. In the unrestricted algorithm, we are filling the matrix entirely without respect to if any of those entires are along the best path or not from the goal to the origin. When we use a bounded algorithm, we are setting a restriction $k$ dictating that we cannot continue in a single direction (if it is not diagonal). For example, if $k=3$, then if my cell equation yielded an "up" three times, then if it yielded up again, then the banded algorithm would force the matrix development to continue down the diagonal. It prevents the meandering nature of the unrestricted algorithm. If we have a lower $k$, that creates a narrower bandwidth for our divide-and-conquer to go explore. It is an area of cells being filled with some $n$-length from origin to goal, and with a "width" of k. Resulting in $kn$ cells being solved each in constant time, $O(kn)$.
 
-If y is even:
-$$
-x^y \mod N = z^2 \mod n
-$$
-If y is odd:
-$$
-x^y \mod N = x z^2 \mod N
-$$
+## Extraction
 
-[^ ]: These calculations both take constant time.
+The extraction process is very simple. When creating our matrix of weights to determine the best path, we simultaneously create a partner matrix containing all the pointers to where their previous one came from. Each cell in the matrix maps to a specific section of each sequence and can be represented as a potential edit. For example, if a cell's previous pointer is diagonal, then we can assume that these sequences in this specific iteration both contain the same letter at that index. If the cell was to the left, or above, then it means there was an insertion at one sequence, and a deletion at another, yielding the '-' in the sequence.  
 
-### Implementation
+## Results
 
-A simple recursive algorithm illustrating how this process is done is:
-
-```pseudocode
-function mod_exp(x, y, N):
-Input: two integers x and N, an integer exponent y
-Output: x^y mod N
-
-if y = 0: return 1
-z = mod_exp(x, y//2, N)  # Recursively halves the exponent 
-if y is even: 
-	return z^2 mod N  # These operations happen in constant time
-else: 
-	return x * z^2 mod N 
+```
+ataagagtgattggcgtccgtacgtaccctttctactctcaaactcttgttagtttaaatctaatctaaactttataaacggcacttcctgtgtgtccatgcccgtgggcttggtcttgtcatagtgctgacatttgtggttccttggtttttgttctctgccagtgacgtgtccattcggcgccagcagcccacccataggttgcataatggcaaagatgggcaaatacggtctcggcttcaaatgggccccagaatttccatggatgcttccgaacgcatcggagaagttgggtagccctgagaggtcagaggaggatgggttttgcccctctgctgcgcaagaaccaaaaactaaaggaaaaactttgattaatcacgtgagggtggattgtagccggcttccagcattggagtgctgtgttcagtctgccataatccgtgatatttttgttgatgaggatcccttgaatgtggaggcctcaactatgatggcattgcagttcggtagtgctgtcttggtcaagccatccaagcgcttgtctattcaggcatgggctaagttgggtgtgctgcctaaaactccagccatggggttgttcaagcgcttctgcctgtgtaacaccagggagtgcgtttgtgacgcccacgtggcttttcaactttttacggtccagcctgatggtgtatgcctgggcaatggccgttttataggctggtttgtgccagtcacagccataccggcgtatgcgaagcagtggttgcaaccctggtccatccttcttcgtaagggtggtaacaaaggttctgtaacatccggccatttccgccgcgctgttaccatgcctgtgtatgactttaatgtggaggatgcttgtgaggaggttcatcttaacccgaagggtaagtactcccgcaaggcgtatgctcttcttaagggctatcgcggtgttaaatccatcctattcttggaccagtatggttgtgactatactgggcg
 ```
 
-### Modular exponentiation complexity
-
-Complexity can be determined through analyzing the branches of the algorithm and what happens to the exponent *y*. Representing $x$ as a power of $y$ ($z$ is merely a holder for, and another multiple of $x^y$):
-$$
-x^y = \begin{cases}
-	(x^{\lfloor y/2 \rfloor})^2  \text{ if y is even}\\
-	x \cdot (x^{\lfloor y/2 \rfloor})^2  \text{ if y is odd}
-\end{cases}
-$$
-At the very most, this algorithm will terminate after $n$ calls, assuming $n$-bits is the maximum size of x, y or N. The secondary case (if $y$ is odd) in a worst-case scenario would yield a total running time of:
-$$
-O(n^3)
-$$
-
-
-
-
----
-
-## Fermat primality test
-
-The Fermat primality test is a way to determine if a number is prime probabilistically. It is based on the famous *Fermat's Little Theorem* which states that if $p$ is prime and $a$ is not divisible by $p$, then:
-$$
-a^{p-1} \equiv 1 \mod p
-$$
-
-Where:
-$$
-1<a<p-1
-$$
-
-[^a]: To avoid trivialities, *a* is chosen within this interval
-
-Conveniently, this is analogous to the above modular exponentiation representation, so that function will be utilized. For $a$, a random integer between 1 and $p-1$ will be picked. $N$ is a value to be tested for primality. At this point, the modular exponentiation can be invoked in the following fashion ($O(n^3)$ complexity):
-$$
-a^{N-1}\mod N
-$$
-After running this *k* times,  if it never is equal to 1, then *N* is composite. Otherwise, *N* is *probably* prime.
-
-### Implementation
-
-```pseudocode
-function fermat(N,k)
-Input: An integer N to be tested for primality. An integer k to specify how many times we run the test.
-Output: "probably prime" or "composite"
-
-Repeat k times:  # This introduces linear time complexity into the algorithm
-	a = a random integer : 1 < a < N-1
-	if mod_exp(a, N-1, N) is not 1:
-		return "composite" 
-return "prime"
-	
+```
+ataagagtgattggcgtccgtacgtaccctttctactctcaaactcttgttagtttaaatctaatctaaactttataaacggcacttcctgtgtgtccatgcccgtgggcttggtcttgtcatagtgctgacatttgtggttccttggtttttgttctctgccagtgacgtgtccattcggcgccagcagcccacccataggttgcataatggcaaagatgggcaaatacggtctcggcttcaaatgggccccagaatttccatggatgcttccgaacgcatcggagaagttgggtagccctgagaggtcagaggaggatgggttttgcccctctgctgcgcaagaaccaaaaactaaaggaaaaactttgattaatcacgtgagggtggattgtagccggcttccagcattggagtgctgtgttcagtctgccataatccgtgatatttttgttgatgaggatcccttgaatgtggaggcctcaactatgatggcattgcagttcggtagtgctgtcttggtcaagccatccaagcgcttgtctattcaggcatgggctaagttgggtgtgctgcctaaaactccagccatggggttgttcaagcgcttctgcctgtgtaacaccagggagtgcgtttgtgacgcccacgtggcttttcaactttttacggtccagcctgatggtgtatgcctgggcaatggccgttttataggctggtttgtgccagtcacagccataccggcgtatgcgaagcagtggttgcaaccctggtccatccttcttcgtaagggtggtaacaaaggttctgtaacatccggccatttccgccgcgctgttaccatgcctgtgtatgactttaatgtggaggatgcttgtgaggaggttcatcttaacccgaagggtaagtactcccgcaaggcgtatgctcttcttaagggctatcgcggtgttaaatccatcctattcttggaccagtatggttgtgactatactgggcg
 ```
 
-### Complexity of Fermat Test
+I ran these through a diff tool, and they are identical. There's a bug somewhere. I struggled with passing data around between the GUI and my code. 
 
-All of the operations and comparisons in the algorithm run at constant time, except for the modular exponentiation which runs at $O(n^3)$. This operation is being run *k* times as a result of the loop, introducing a linear dependency. Thus, the time-complexity is:
-$$
-O(kn^3)
-$$
-This description could be diluted, as the exponential term will dominate the growth of the linear factor:
-$$
-O(n^3)
-$$
+![image-20210529005355196](/home/nrsmac/PycharmProjects/cs312/proj1-fermat/image-20210529005355196.png)
 
-
-
-### Accuracy of Fermat test
-
-In a best-case scenario, the Fermat test's accuracy has the following relationship with *k* iterations of the test.
-$$
-2^k
-$$
-This is promising -- accuracy grows incredibly with an increase in *k*, a trivial task for modern computers. However, the Fermat primality test comes with a few caveats. There are some *p* values that will satisfy this theorem, but which are composite. In this case, the *a* is called a *Fermat liar*, and the *p* is called *Fermat witness*. There are infinitely many of these Fermat pseudo-primes which will break this test. In these scenarios, the Fermat test performs no better than a random guess.
-
-To add insult to injury, Carmichael numbers cannot be neglected. These are *n* values in this representation for which all exponents are Fermat liars. Thankfully, for this reason the Miller-Rabin test provides a better solution. 
-
-
-
----
-
-## Miller-Rabin primality test
-
-Much like the Fermat test, the Miller-Rabin test determines if a number is likely to be prime based on congruence relations. It's built off of the Fermat test, but uses more strict parameters to determine primality. 
-
-The test is defined as following. Given an odd integer n > 2, *n* can be represented as the following polynomial:
-$$
-n = 2^s \cdot d+1
-$$
-Where *s, d* are both positive integers, and *d* is odd. Choosing some base *a* in **one of the following congruences**, *n* is **strongly probable** relative prime to *a*:
-$$
-a^d \equiv 1 \mod n
-$$
-
-$$
-a^{2^r\cdot d}\equiv -1 \mod n \text{ (for some } 0\leq r <s).
-$$
-
-The Miller-Rabin this adds an extra case as a filter to remove many of the anomalies that passed through the Fermat test. While this is better, there are still certain n composites that can slip through the cracks (called *strong pseudoprimes*). This test will only tell the *probability* that n is prime, however accurate it may be, but is not conclusive.  
-
-When choosing a value for base *a*, a random value between 1 and n-1 will be chosen. This is done in lieu of testing every possible *a*, which would be inefficient.
-
-### Implementation
-
-While mathematically analogous, the recursive implementation of this test is more difficult. A recursive "helper" function is used to do the majority of the work. This pseudocode will call the previous modular exponentiation implementation above. 
-
-```pseudocode
-function mr_helper(b, power, n):
-Inputs: three integers: a base, a power and a test value n
-Output: "prime" or "composite"
-
-b_n = mod_exp(b, power, n)  # Introduces O(n^3) complexity
-if b_n is even: 
-	return composite
-if b_n = (n-1):
-	return "prime"
-else if b_n is not 1:
-	return mr_helper(b_n, power//2, n)  # O(logN) complexity
-```
-
-> Note how the power is being halved before each recursive call. This means that by the time `b_n` is calculated after a recursive call, this would take O(n^6) time to perform, unfortunately. 
-
-The main function serves as a driver choosing a random base `a` within stated parameters. It first checks the initial `b_0` from modular exponentiation is prime or not. It also checks if the test value is even, which would save runtime in those cases avoiding having to make recursive calls for a trivial problem. It runs the test `k` times.
-
-```pseudocode
-function miller_rabin(N,k):
-Inputs: two integers: test value N, k is how many times the test runs
-Output: "prime" or "composite"
-
-Repeat k times:  # Linear time O(k)
-	if n is even: 
-		return "composite"
-	a = random integer between (2, N-2)
-	b_0 = mod_exp(a, N-1, N)  # Our initial modular exponentiation. Takes O(n^3) time
-	if b_0 = 1 or b_0 = -1: 
-		return "prime"
-	else:
-		return mb_helper(b_0, N-1, N)  # Recursive call O(n)
-```
-
-### Complexity of Miller-Rabin Test
-
-Evaluating time complexity for Miller-Rabin test is multifaceted, but by following the steps of the pseudocode, the following steps:
-$$
-1+1+O(n^3)\times O(n) +1\\
-O(n^3)+O(n^6) = O(n^3\times n^6)=O(n^6)
-$$
-where $n^6$ dominates. This is run *k* times:
-$$
-O(k\cdot n \cdot n^3) = O(n^4)
-$$
-
-
-### Accuracy of Miller-Rabin Test
-
-The Miller-Rabin has a much improved accuracy over the Fermat test. The error bound that a number determined prime by the test and is not a *strong pseudoprime* is:
-$$
-4^k
-$$
-
-
----
-
-## Appendix -- Python Code
+Appendix:
 
 ```python
-import random
+
+import math
+import time
+import numpy as np
+
+# Used to compute the bandwidth for banded version
+MAXINDELS = 3
+
+# Used to implement Needleman-Wunsch scoring
+MATCH = -3
+INDEL = 5
+SUB = 1
+
+TOP = 0
+DIAG = 1
+LEFT = 2
 
 
-def prime_test(N, k):
-    # Responsible for running the GUI stuff
-    return run_fermat(N, k), run_miller_rabin(N, k)
+class GeneSequencing:
+
+    def __init__(self):
+        pass
+
+    # This is the method called by the GUI.  _sequences_ is a list of the ten sequences, _table_ is a
+    # handle to the GUI so it can be updated as you find results, _banded_ is a boolean that tells
+    # you whether you should compute a banded alignment or full alignment, and _align_length_ tells you
+    # how many base pairs to use in computing the alignment
+    def align(self, sequences, table, banded, align_length):
+        self.banded = banded
+        self.MaxCharactersToAlign = align_length
+        results = []
+
+        for i in range(len(sequences)):
+            jresults = []
+            for j in range(len(sequences)):
+                if j < i:
+                    s = {}
+                else:
+                    # your code should replace these three statements and populate the three variables: score,
+                    # alignment1 and alignment2
+
+                    if not banded:
+                        not_banded_result = self.get_not_banded(sequences[i][:align_length],
+                                                                sequences[j][:align_length])
+                        score = not_banded_result[0]
+                        alignment1 = not_banded_result[1]
+                        alignment2 = not_banded_result[2]
+                    else:
+                        banded_result = self.get_banded(sequences[i][:align_length], sequences[j][:align_length])
+
+                    score = i + j
+                    alignment1 = 'abc-easy  DEBUG:(seq{}, {} chars,align_len={}{})'.format(i + 1,
+                                                                                           len(sequences[i]),
+                                                                                           align_length,
+                                                                                           ',BANDED' if banded else '')
+                    alignment2 = 'as-123--  DEBUG:(seq{}, {} chars,align_len={}{})'.format(j + 1,
+                                                                                           len(sequences[j]),
+                                                                                           align_length,
+                                                                                           ',BANDED' if banded else '')
+                    ###################################################################################################
+                    s = {'align_cost': score, 'seqi_first100': alignment1, 'seqj_first100': alignment2}
+                    table.item(i, j).setText('{}'.format(int(score) if score != math.inf else score))
+                    table.repaint()
+                jresults.append(s)
+            results.append(jresults)
+        return results
+
+    def get_not_banded(self, sequence1, sequence2):
+
+        # matrix = np.ones((len(sequence1) + 1, len(sequence2) + 1)) * np.inf
+        # back_pointer_matrix = np.ones((len(sequence1) + 1, len(sequence2) + 1)) * np.inf
+
+        matrix = [[math.inf for x in range(len(sequence2)+1)]for y in range(len(sequence1)+1)]
+        back_pointer_matrix = [[math.inf for x in range(len(sequence2)+1)]for y in range(len(sequence1)+1)]
 
 
-def mod_exp(x, y, N):
-    if y == 0:  # Anything to the power of 0 is 1
-        return 1
-    z = mod_exp(x, y // 2, N)  # Recursively halves 
-    if y % 2 == 0:
-        return z ** 2 % N
-    else:
-        return x * (z ** 2) % N
+        # initialize matrix stuff
+        for i in range(len(sequence1) + 1):
+            matrix[i][0] = i
+            back_pointer_matrix[i][0] = TOP
 
+        for j in range(len(sequence2) + 1):
+            matrix[0][j] = j
+            back_pointer_matrix[0][j] = LEFT
 
-def fprobability(k):
-    return 1 - 1 / (2 ** k)
+        back_pointer_matrix[0][0] = -1
 
+        for i in range(1, len(sequence1)+1):
+            for j in range(1, len(sequence2)+1):
+                #  find out what the top is, what diag is, and what left is
+                #  compare them all to get the shortest while accounting for INDEL, sub and match
+                #  get a value that goes into the
+                #  update back matrices accordingly -> back_pointer_matrix[i][j]
+                if i == 1 and j ==1 :
+                    matrix[i][j] = 1
+                    back_pointer_matrix[i][j] = DIAG
+                else:
+                    if sequence1[i-1] == sequence2[j-1]:
+                        diff = 0
+                    else:
+                        diff = 1
 
-def mprobability(k):
-    return 1 - (4 ** k)
+                    corners = [matrix[i-1][j] + 1, matrix[i - 1][j - 1]+diff, 1 + matrix[i][j-1]]##top, diag, left
+                    E = min(corners)
 
+                    matrix[i][j] = E
+                    back_pointer_matrix[i][j] = corners.index(E)  #either TOP, DIAG, LEFT
 
-def run_fermat(N, k=200):
-    for i in range(0, k):
-        a = random.randint(1, N - 1)
-        if mod_exp(a, N - 1, N) != 1:
-            # can be prime
-            return "composite"
-    return "prime"
+        not_banded_path = self.get_path(back_pointer_matrix, sequence1, sequence2)
 
+        return matrix[1][1], not_banded_path[0], not_banded_path[1]
 
-def b_helper(b, power, n):
-    b_n = mod_exp(b, power, n)
-    if b_n % 2 == 0:
-        return "composite"
-    if b_n == (n - 1):
-        return "prime"
-    elif b_n != 1:
-        return b_helper(b_n, power // 2, n)
+    def get_path(self, back_pointer_matrix, sequence1, sequence2):
 
+        alignment1 = ""
+        alignment2 = ""
+        i, j = len(sequence1), len(sequence2)  # our back pointer matrix can only go backwards
+        while i != 0 or j != 0:
+            if back_pointer_matrix[i][j] == TOP:
+                # do the zero stuff, it came from top
+                sequence1_char = sequence1[i-1]
+                alignment1 = sequence1_char + alignment1  # add it to the front of alignment one
+                alignment2 = "-" + alignment2  # add it to the front of alignment 2
+                i -= 1
 
-def run_miller_rabin(N, k):
-    for i in range(k):
-        if N % 2 == 0:
-            return "composite"
-        a = random.randint(2, N - 2)
-        b_0 = mod_exp(a, N - 1, N)
-        if b_0 == 1 or b_0 == -1:
-            return "prime"
-        else:
-            return b_helper(b_0, N - 1, N)
+            elif back_pointer_matrix[i][j] == DIAG:
+                # came from diagonal
+                sequence1_char = sequence1[i - 1]
+                sequence2_char = sequence2[j - 1]
+                alignment1 = sequence1_char + alignment1  # add it to the front of alignment 1
+                alignment2 = sequence2_char + alignment2  # add it to the front of alignment 2
+                i -= 1
+                j -= 1
+
+            elif back_pointer_matrix[i][j] == LEFT:
+                sequence2_char = sequence2[j-1]
+                alignment1 = "-" + alignment1  # add it to the front of alignment 1
+                alignment2 = sequence2_char + alignment2  # add it to the front of alignment 2
+                j -= 1
+            else:
+                raise ValueError("Invalid pointer {} in array at ({},{})".format(back_pointer_matrix[i][j], i, j))
+
+        return [alignment1, alignment2]
 ```
-
-
 
