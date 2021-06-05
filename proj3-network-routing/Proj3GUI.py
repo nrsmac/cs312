@@ -346,7 +346,7 @@ class Proj3GUI( QMainWindow ):
                 self.view.repaint()
 
 # Listens for signal of mouse click and finds the nearest point and sets it alternately as
-# source or target node
+# source or target Node
     def setByClick(self,clickednode,point):
         if not self.graphReady:
             pass
@@ -356,7 +356,7 @@ class Proj3GUI( QMainWindow ):
             for node in self.graph.nodes:
                 if math.sqrt(pow((abs(node.loc.x()-point.x())),2) + pow((abs(node.loc.y()-point.y())),2)) < dist:
                     dist = math.sqrt(pow((abs(node.loc.x()-point.x())),2) + pow((abs(node.loc.y()-point.y())),2))
-                    id = node.node + 1
+                    id = node.Node + 1
             if id != -1:
                 self.view.clearEdges()
                 if clickednode == 'start':

@@ -41,7 +41,7 @@ class PointLineView( QWidget ):
 
 	def clearEdges(self,removeColors = None):
 		self.edgeList = {}
-		if removeColors:							# allows removal of edge labels without removing node labels, for example
+		if removeColors:							# allows removal of edge labels without removing Node labels, for example
 			for color in removeColors:
 				if color in self.labelList:
 					del self.labelList[color]			
@@ -388,7 +388,7 @@ class Proj5GUI( QMainWindow ):
 
 		self.curSeed		= QLineEdit('20')
 		self.curSeed.setFixedWidth(100)
-		self.size			= QLineEdit('15')
+		self.size			= QLineEdit('5')
 		self.size.setFixedWidth(50)
 		self.timeLimit		= QLineEdit('60')
 		self.timeLimit.setFixedWidth(50)

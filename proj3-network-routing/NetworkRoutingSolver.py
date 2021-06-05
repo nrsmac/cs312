@@ -24,7 +24,7 @@ class NetworkRoutingSolver:
 
         path_edges = []
         total_length = 0
-        # node = self.network.nodes[self.source]
+        # Node = self.network.nodes[self.source]
         # edges_left = 3
         #
         # nodes = self.network.nodes
@@ -88,12 +88,12 @@ class NetworkRoutingSolver:
 
         while heap.size != 0:
             popped = heap.pop()
-            visited.append(popped.node)
-            for edge in popped.node.neighbors:
-                new_distance = table[popped.node][0] + edge.length
+            visited.append(popped.Node)
+            for edge in popped.Node.neighbors:
+                new_distance = table[popped.Node][0] + edge.length
                 if new_distance < table[edge.dest][0]:
-                    table[edge.dest] = [new_distance, popped.node]
-                    heap.insert(HeapEntry(edge.dest, new_distance, popped.node))
+                    table[edge.dest] = [new_distance, popped.Node]
+                    heap.insert(HeapEntry(edge.dest, new_distance, popped.Node))
 
         self.distances = table.copy()
 
