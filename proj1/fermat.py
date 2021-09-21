@@ -2,45 +2,52 @@ import random
 
 
 def prime_test(N, k):
-	# This is main function, that is connected to the Test button. You don't need to touch it.
 	return fermat(N,k), miller_rabin(N,k)
 
 
 def mod_exp(x, y, N):
-    # You will need to implement this function and change the return value.   
-		if y==0: return 1
-		z = mod_exp(x, y//2, N)
-		if y%2==0: 
-			return z**2 % N
-		else:
-			return x*z**2 % N
-	
+	if y==0: return 1
+	z = mod_exp(x, y//2, N)
+	if y%2==0: 
+		return z**2 % N
+	else:
+		return x*(z**2) % N
+
 
 def fprobability(k):
-    # You will need to implement this function and change the return value.   
-    return 0.0
+    return 1 - 1 / (2 ** k)
 
 
 def mprobability(k):
-    # You will need to implement this function and change the return value.   
-    return 0.0
+    return 1-(4 ** -k)
 
 
 def fermat(N,k):
-    # You will need to implement this function and change the return value, which should be
-    # either 'prime' or 'composite'.
-	#
-    # To generate random values for a, you will most likley want to use
-    # random.randint(low,hi) which gives a random integer between low and
-    #  hi, inclusive.
-	return 'prime'
+    for i in range(0, k):
+        a = random.randint(1, N-1)
+        if mod_exp(a, N-1, N) != 1:
+            return 'composite'
+    return 'prime'
+
+
+def b_helper(b, power, n):
+    b_n = mod_exp(b, power, n)
+    if b_n % 2 == 0:
+        return "composite"  
+    if b_n == (n - 1):
+        return "prime"
+    elif b_n != 1:
+        return b_helper(b_n, power // 2, n)
 
 
 def miller_rabin(N,k):
-    # You will need to implement this function and change the return value, which should be
-    # either 'prime' or 'composite'.
-	#
-    # To generate random values for a, you will most likley want to use
-    # random.randint(low,hi) which gives a random integer between low and
-    #  hi, inclusive.
-	return 'composite'
+    for i in range(k):
+        if N % 2 == 0:
+            return "composite"
+        a = random.randint(2, N - 2)
+        b_0 = mod_exp(a, N - 1, N)
+        if b_0 == 1 or b_0 == -1:
+            return "prime"
+        else:
+            return b_helper(b_0, N - 1, N)
+
