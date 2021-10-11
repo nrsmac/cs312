@@ -226,7 +226,7 @@ class Proj2GUI( QMainWindow ):
 		self.setCentralWidget( boxwidget )
 
 		self.view           = PointLineView( self.statusBar )
-		self.npoints        = QLineEdit('10')
+		self.npoints        = QLineEdit('5')
 		self.generateButton = QPushButton('Generate')
 		self.solveButton    = QPushButton('Solve')
 		self.clearButton    = QPushButton('Clear To Points')
@@ -289,7 +289,7 @@ class Proj2GUI( QMainWindow ):
 		self.distribOval.setChecked(True)
 		self.generateClicked()
 
-		self.showRecursion.setChecked(False)
+		self.showRecursion.setChecked(True)
 
 		self.show()
 

@@ -1,70 +1,145 @@
-from which_pyqt import PYQT_VER
+# Project 2: Convex Hull
 
-if PYQT_VER == 'PYQT5':
-    from PyQt5.QtCore import QLineF, QPointF, QObject
-elif PYQT_VER == 'PYQT4':
-    from PyQt4.QtCore import QLineF, QPointF, QObject
-else:
-    raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
+## Noah Schill  Fall 2021  CS312
 
-import time
+![Screen Shot 2021-09-30 at 10.41.24 PM](/Users/nrsmac/Library/Application Support/typora-user-images/Screen Shot 2021-09-30 at 10.41.24 PM.png)
 
-# Some global color constants that might be useful
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+![Screen Shot 2021-09-30 at 10.41.53 PM](/Users/nrsmac/Library/Application Support/typora-user-images/Screen Shot 2021-09-30 at 10.41.53 PM.png)
 
-# Global variable that controls the speed of the recursion automation, in seconds
-#
-PAUSE = 0.25
+### Pseudocode
 
+*Write the full, unambiguous pseudo-code for your divide-and-conquer algorithm for finding the convex hull of a set of points Q. Be sure to label the parts of your algorithm. Also, label each part with its worst-case time efficiency.*
 
-#
-# This is the class you have to complete.
-#
-def sort_points(points):
-    points.sort(key=lambda p: p.x())
-    return points
+```pseudocode
+function convex_hull(Q): 
+	hull_points = self.hull_helper(Q)
+	lines = []
+	for index in range(len(hull_points)-1):  // takes O(points) time in worst case
+		line = new line(point[index], point[index+1])
+		lines.append(line)
+	lines.append(new line(hull_points[-1], hull_points[0]))
 
+function hull_helper(points):  // T(n) = 2(n/2)+O(n^1) -> O(n*log(n)). Space complexity: O(n)
+	if len(points) <= 2:  // Base case, 2 points only
+		return points sorted by x-value
+	
+	//Divide points into l, r and run the helper on them
+	l_points, r_points = points[0...k//2], points[k//2...k] 
+	l_hull = hull_helper(l_points)
+	r_hull = self.hull_helper(r_points)
+	
+	return merge(l_hull, r_hull)
+	
+function merge(l_hull, r_hull):  // Time: O(n), Space: O(n)
+	upper_tangent = upper_tangent(l_hull, r_hull)
+	lower_tangent = lower_tangent(l_hull, r_hull)
+	
+	final_hull = []
+	
+	P = first element in l_hull
+	while P is not the left upper tangent:
+		add P to final_hull
+		increment P to next counter-clockwise element in l_hull
+	add left upper tangent to final_hull
+	
+	P = right upper tangent in r_hull
+	while P is not right lower tangent:
+		add P to final_hull
+		increment P to next clockwise element in r_hull 
+	add lower left tangent to final_hull
+	
+	P = lower left tangent in l_hull
+	while P is not the 0th element of l_hull:
+  	if P isn't already in final_hull:
+  		add P to final_hull
+  	increment P to next clockwise point in l_points
+  	
+  return final_hull
+ 
+function upper_tangent(l_hull, r_hull):  // Time: O(n), Space: O(1)
+	p = rightmost point in l_hull
+	q = leftmost point in r_hull
+	found_tangent = false
+	current_slope = slope(p, q)
+	
+	while not found_tangent:
+		found_tangent = true
+		next_p = next counter-clockwise point in l_hull
+		while current_slope > slope(next_p, q):
+			p = next_p
+			current_slope = slope (p, q)
+			found_tangent = false
+			
+		next_q = next clockwise point in r_hull:
+		while current_slope < slope(p, next_q):
+			q = next_q
+			current_sloppe = slope(p, q)
+			found = false
+		
+	return p, q
+	
+function lower_tangent(l_hull, r_hull):  // Time: O(n), Space: O(1)
+	p = rightmost point in l_hull
+	q = leftmost point in r_hull
+	found_tangent = false
+	current_slope = slope(p, q)
+	
+	while not found_tangent:
+		found_tangent = true
+		next_p = next clockwise point in l_hull
+		while current_slope < slope(next_p, q):
+			p = next_p
+			current_slope = slope (p, q)
+			found_tangent = false
+			
+		next_q = next counter-clockwise point in r_hull:
+		while current_slope > slope(p, next_q):
+			q = next_q
+			current_sloppe = slope(p, q)
+			found = false
 
-def slope(p1, p2):
-    return (p2.y() - p1.y()) / (p2.x() - p1.x())
+	return p, q
+	
+function slope(p1, p2):  // O(1)
+	return p2.y - p1.y / p2.x - p1.x 
+```
 
+---
 
-class ConvexHullSolver(QObject):
+### Time-complexity Analysis
 
-    # Class constructor
-    def __init__(self):
-        super().__init__()
-        self.pause = False
+*Analyze the whole algorithm for its worst-case time efficiency. State the Big-O asymptotic bound. Discuss how this relates to the Master Theorem estimate for runtime.*
 
-    # Some helper methods that make calls to the GUI, allowing us to send updates
-    # to be displayed.
+The Big-O asymptotic bound is $O(n \log n)$ for $n$ points. This is because in the helper function, there is a recursive call with a branching factor of $a=2$ cut into $n/2$ pieces for the left and right sub-hulls. At each stack frame, it takes $O(n)$ to find find the tangents and merge the sub-hulls together ($O(n)$ at each step). By master theorem:
+$$
+T(n) = 2T(\frac{n}{2})+O(n^1) \\= O(n\log n)
+$$
 
-    def showTangent(self, line, color):
-        self.view.addLines(line, color)
-        if self.pause:
-            time.sleep(PAUSE)
+### Empirical analysis
 
-    def eraseTangent(self, line):
-        self.view.clearLines(line)
+![image-20210930220345909](/Users/nrsmac/Library/Application Support/typora-user-images/image-20210930220345909.png)
 
-    def blinkTangent(self, line, color):
-        self.showTangent(line, color)
-        self.eraseTangent(line)
+![Unknown](/Users/nrsmac/Downloads/Unknown.png)
 
-    def showHull(self, polygon, color):
-        self.view.addLines(polygon, color)
-        if self.pause:
-            time.sleep(PAUSE)
+Given the graph, the empirical function and the theoretical functions mirror each other closely in shape. This graph has a logarithmic x and y axis. I calculated the constant of proportionality to be: 
+$$
+k = 7.91428439802643\mathrm{e}{-06}
+$$
+via the following code:
 
-    def eraseHull(self, polygon):
-        self.view.clearLines(polygon)
+```python
+sum = 0
+for i in range(len(time)):
+    sum += (time[i]/logfunc[i])
+k = sum/len(time)
+```
 
-    def showText(self, text):
-        self.view.displayStatusText(text)
+where logfunc is given by `logfunc = np.log(df["n"].to_numpy())*df["n"].to_numpy()`. 
 
-    # This is the method that gets called by the GUI and actually executes
+### Code:
+
+```python
+# This is the method that gets called by the GUI and actually executes
     # the finding of the hull
     def compute_hull(self, points, pause, view):
         self.pause = pause
@@ -187,3 +262,5 @@ class ConvexHullSolver(QObject):
                 found = False
 
         return p, q
+
+```

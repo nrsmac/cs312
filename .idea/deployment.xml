@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="shelly" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="shelly">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$USER_HOME$/PycharmProjects" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
