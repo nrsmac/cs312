@@ -67,6 +67,53 @@ class TSPSolver:
         results['pruned'] = None
         return results
 
+    def greedy(self, time_allowance=60.0):
+        # Track time
+        start_time = time.time()
+        # Init variables before starting.
+        numCities = len(self._scenario.getCities())
+        count = 0
+        bssf = None
+
+        for i in range(numCities):
+            if time.time() - start_time >= time_allowance:
+                break
+
+            cities = list(self._scenario.getCities())
+            start = cities.pop(i)
+            route = [start]
+            while len(cities):
+                nextCity = None
+                shortestPath = np.inf
+                for city in cities:
+                    dist = route[-1].costTo(city)
+                    if dist < shortestPath:
+                        shortestPath = dist
+                        nextCity = city
+                if shortestPath == np.inf:
+                    break
+                route.append(nextCity)
+                cities.remove(nextCity)
+
+            if len(route) == numCities:
+                # Found a solution
+                sol = TSPSolution(route)
+                count += 1
+                if bssf is None or sol.cost < bssf.cost:
+                    bssf = sol
+
+        end_time = time.time()
+
+        return {
+            'cost': bssf.cost if bssf else None,
+            'time': end_time - start_time,
+            'count': count,
+            'soln': bssf,
+            'max': None,
+            'total': None,
+            'pruned': None
+        }
+
     def greedy_bssf(self, time_allowance=60.0):
         cost = 0
         path_of_cities = []
