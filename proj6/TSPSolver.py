@@ -67,6 +67,51 @@ class TSPSolver:
         results['pruned'] = None
         return results
 
+    '''
+    Cheapest Insertion also begins with two cities. 
+    It then finds the city not already in the tour that when placed between two connected cities in the subtour will 
+    result in the shortest possible tour. 
+    It inserts the city between the two connected cities, and repeats until there are no more insertions left.
+    
+    - Start from a random city.
+    - Find the city which insertion in the tour causes the smallest increase in length,  
+        i.e the city k which minimizes d(i, k)  + d(k, j) - d(i, j) with (i, j) an edge in the partial tour.
+    - Insert k between i and j.
+    - Repeat until every city has been visited.
+    '''
+    def fancy(self, time_allowance=60.0):
+        cities = list(self._scenario.getCities())
+        cost = 0
+        count = 0
+
+        # Track time
+        start_time = time.time()
+        end_time = time.time()
+
+        P = [] # Path
+        V = cities.copy()  # Cities list
+        Z = 0  # Cost?
+
+        # Initialization -- arbitrarily choose first vertex 'r'. Tour P = [r], Z=0
+        # While |P| < |V| (while path is incomplete)
+            # For each vertex i in V not in P, find the cheapest insertion between any j and k in P; and neighboring in P
+                # * Use a Priority Queue to find cheapest insertion
+            # find vertex i* in V not in P that can be inserted the cheapest;
+            # insert i* at cheapest position j* and k*
+            # P = {r, ..., j*, i*, k*,...} and set
+            # Z = Z - (c_(j*k*) + c_(j*i*) + c_(i*k*))
+
+        solution = TSPSolution(P)
+        return {
+            'cost': cost,
+            'time': end_time - start_time,
+            'count': count,
+            'soln': solution,
+            'max': None,
+            'total': None,
+            'pruned': None
+        }
+
     def greedy(self, time_allowance=60.0):
         # Track time
         start_time = time.time()
