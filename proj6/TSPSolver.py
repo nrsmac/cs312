@@ -18,6 +18,14 @@ from State import State
 import heapq
 import itertools
 
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass(order=True)
+class TSPSubtask:
+    priority: int
+    item: Any=field(compare=False)
+
 
 class TSPSolver:
     def __init__(self, gui_view):
