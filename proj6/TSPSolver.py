@@ -91,8 +91,6 @@ class TSPSolver:
         cities = list(self._scenario.getCities())
 
         # # Track time
-        start_time = time.time()
-        end_time = time.time()
 
         # P = [] # Path
         # V = cities.copy()  # Cities list
@@ -124,70 +122,95 @@ class TSPSolver:
 
         iterations = 0
 
-        firstNode = cities[0]
-        remainingCities = cities.copy()
-        remainingCities.remove(firstNode)
-        state = {
-            "path": [ firstNode ],
-            "remaining": remainingCities,
-            "sol": None, # A TSP Solution will later go here.
-            "cost": np.inf
-        }
-        while len(state["path"]) < len(cities): # While path is incomplete
-            # Iterate backwards through the current path
-            # We could hypothetically limit this to n possiblities to make the algo faster.
-            minState = {
+        bssf = {'cost' : math.inf}
+        start_time = time.time()
+        for starting_city in cities:
+
+            firstNode = starting_city
+            remainingCities = cities.copy()
+            remainingCities.remove(firstNode)
+            state = {
+                "path": [ firstNode ],
+                "remaining": remainingCities,
+                "sol": None, # A TSP Solution will later go here.
                 "cost": np.inf
             }
-            # Try to find the lowest possible state that can result from another edge added.
-            for R in reversed(state["path"]): # Runs 1..n times (n/2 on average)
-                # Go through every possible edge (pair of nodes)
-                # Note: this does consider every edge forwards and backwards,
-                # which is inefficient on easy (symmetrical) mode,
-                # but exactly what we want for hard (asym) mode
-                for j in state["remaining"]: # Runs n..1 times
-                    for k in state["remaining"]: # Runs n..1 times
-                        if j == k: continue # Ignore the instance where they're the same
-                        # Consider the new edges: r->j, j->k, k->r (k->r is actually implied; we don't actually add it)
-                        # R won't always be the last node added. We need to figure
-                        # out what position it's at in the path so that we can insert j,k after it.
-                        newPath = state["path"].copy()
-                        rIndex = newPath.index(R) + 1
-                        newPath.insert(rIndex, j)
-                        newPath.insert(rIndex+1, k)
-                        newSol = TSPSolution(newPath)
-                        if newSol.cost < minState["cost"]:
-                            # We found a new "lowest" newState
-                            # Store a bunch of info about it
-                            newRemaining = state["remaining"].copy()
-                            newRemaining.remove(j)
-                            newRemaining.remove(k)
-                            minState = {
-                                "path": newPath,
-                                "remaining": newRemaining,
-                                "cost": newSol.cost,
-                                "sol": newSol
-                            }
-                        # Otherwise, just let the iteration end
-                        # so the next combination can be tried.
 
-                        # This is just to figure out the time complexity - remove later
-                        iterations += 1
+            while len(state["path"]) < len(cities): # While path is incomplete
+                # Iterate backwards through the current path
+                # We could hypothetically limit this to n possiblities to make the algo faster.
+                minState = {
+                    "cost": np.inf,
+                    "path": []
+                }
+                # Try to find the lowest possible state that can result from another edge added.
+                for R in reversed(state["path"]): # Runs 1..n times (n/2 on average)
+                    # Go through every possible edge (pair of nodes)
+                    # Note: this does consider every edge forwards and backwards,
+                    # which is inefficient on easy (symmetrical) mode,
+                    # but exactly what we want for hard (asym) mode
+                    for j in state["remaining"]: # Runs n..1 times
+                        for k in state["remaining"]: # Runs n..1 times
+                            newPath = state["path"].copy()
+                            rIndex = newPath.index(R) + 1
+                            if len(state['remaining']) == 1:
+                                newPath.insert(rIndex, j)
+                            else:
+                                if j == k: continue
+                                newPath.insert(rIndex, j)
+                                newPath.insert(rIndex + 1, k)
+                            # if j == k: continue # Ignore the instance where they're the same
+                            # Consider the new edges: r->j, j->k, k->r (k->r is actually implied; we don't actually add it)
+                            # R won't always be the last node added. We need to figure
+                            # out what position it's at in the path so that we can insert j,k after it.
 
-            # Once all possibilities of R, j and k have been tried,
-            # The state becomes the minState and we go on to add the next node.
-            if minState["cost"] == np.inf:
-                raise Exception("Got stuck; no paths left at this point.")
-            state = minState
+                            newSol = TSPSolution(newPath)
+                            if newSol.cost < minState["cost"]:
+                                # We found a new "lowest" newState
+                                # Store a bunch of info about it
+                                newRemaining = state["remaining"].copy()
+                                newRemaining.remove(j)
+                                if k in newRemaining:
+                                    newRemaining.remove(k)
+                                minState = {
+                                    "path": newPath,
+                                    "remaining": newRemaining,
+                                    "cost": newSol.cost,
+                                    "sol": newSol
+                                }
+                            # Otherwise, just let the iteration end
+                            # so the next combination can be tried.
 
-            print("Finished an iteration. Path is now:",[str(x) for x in state["path"]],"and cost is now:",state["cost"])
+                            # This is just to figure out the time complexity - remove later
+                            iterations += 1
 
+
+                # Once all possibilities of R, j and k have been tried,
+                # The state becomes the minState and we go on to add the next node.
+                state = minState
+
+                # print("Finished an iteration. Path is now:",[str(x) for x in state["path"]],"and cost is now:",state["cost"])
+
+            if state['cost'] < bssf['cost']:
+                bssf = state
+                # print(f"Bssf was updated, starting node was {starting_city}")
+
+            # track time
+            end_time = time.time()
+            if end_time - start_time > 60:
+                break
+
+
+
+        if bssf["cost"] == np.inf:
+            raise Exception("Got stuck; no paths left at this point.")
 
         print("Total iterations of inner-most loop:",iterations)
 
         # solution = TSPSolution(P)
-        solution = state["sol"]
-        cost = state["cost"]
+        end_time = time.time()
+        solution = bssf["sol"]
+        cost = bssf["cost"]
         return {
             'cost': cost,
             'time': end_time - start_time,

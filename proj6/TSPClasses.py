@@ -174,6 +174,8 @@ class City:
 			if cost < 0.0:
 				cost = 0.0					# Shouldn't it cost something to go downhill, no matter how steep??????
 
-
 		return int(math.ceil(cost * self.MAP_SCALE))
+
+	def __str__(self):
+		return self._name
 
