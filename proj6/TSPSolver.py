@@ -144,7 +144,10 @@ class TSPSolver:
                     "path": []
                 }
                 # Try to find the lowest possible state that can result from another edge added.
-                for R in reversed(state["path"]): # Runs 1..n times (n/2 on average)
+                current_path = state['path'].copy()
+                current_path.reverse()
+                # current_path = current_path[:3]
+                for R in current_path:  # Runs 1..n times (n/2 on average)
                     # Go through every possible edge (pair of nodes)
                     # Note: this does consider every edge forwards and backwards,
                     # which is inefficient on easy (symmetrical) mode,
